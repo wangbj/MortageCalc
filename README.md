@@ -9,7 +9,7 @@ usage:
 
 i.e.:
 
-MortageCalc 250000 0.04 15 2011/11/1
+MortageCalc 250000 0.04 15
 
 or 
 
