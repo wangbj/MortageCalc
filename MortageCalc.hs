@@ -9,8 +9,8 @@ import Mortage
 
 constructArgs :: [String]-> [Maybe String]
 constructArgs args =
-  take 6 $ map (Just) args `mplus` b
-  where b = [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  take 7 $ map (Just) args `mplus` b
+  where b = [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
 
 tail' :: [a] -> Maybe [a]
 tail' s
@@ -49,6 +49,9 @@ readDate dt
   where dt' = parseDate dt
         dt'' = fromJust dt'
 
+readDateGuarded' Nothing = readDate "2013/11/1"
+readDateGuarded' (Just dt) = readDate dt
+
 readOneTimePayment' :: Maybe String -> Maybe (OneTimePayment (DTime, Double))
 readOneTimePayment' yp' =
   break' ( == ',' ) yp' >>= \(dt, m) ->
@@ -73,17 +76,19 @@ readYearlyPayment yp = readYearlyPayment' (Just yp)
 
 parseArgs :: [String] -> Maybe (MortageLoan, Payment)
 parseArgs args = 
-  let [arg1, arg2, arg3, arg4, arg5, arg6] = constructArgs args
+  let [arg1, arg2, arg3, arg4, arg5, arg6, arg7] = constructArgs args
       total = (readM arg1 :: Maybe Double)
       rate = (readM arg2 :: Maybe Double)
       term = (readM arg3 :: Maybe Int)
       madd = (readM arg4 :: Maybe Double)
       ypay = readYearlyPayment' arg5
       apay = readOneTimePayment' arg6
+      start = readDateGuarded' arg7
   in total >>= \total' ->
      rate >>= \rate' ->
      term >>= \term' ->
-     return $ (MortageLoan total' rate' term' (DTime 2013 11 1), Payment Nothing madd ypay apay)
+     start >>= \start' ->
+     return $ (MortageLoan total' rate' term' start', Payment Nothing madd ypay apay)
         
 computeAmortization :: [String] -> Maybe Amortization
 computeAmortization args = 
@@ -105,4 +110,3 @@ mainloop args = do
   displayTotalInterest' am
     
 main = getArgs >>= mainloop
-
