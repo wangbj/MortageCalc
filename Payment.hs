@@ -34,9 +34,17 @@ instance Monad YearlyPayment where
   return = YearlyPayment
   YearlyPayment a >>= k = k a
 
+instance Applicative YearlyPayment where
+  pure = YearlyPayment
+  (YearlyPayment f) <*> x = fmap f x
+
 instance Monad OneTimePayment where
   return = OneTimePayment
   OneTimePayment a >>= k = k a
+
+instance Applicative OneTimePayment where
+  pure = OneTimePayment
+  (OneTimePayment f) <*> x = fmap f x
 
 fromYearlyPayment (YearlyPayment a) = a
 fromOneTimePayment (OneTimePayment a) = a
