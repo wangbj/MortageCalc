@@ -1,7 +1,7 @@
 MortgageCalc
 ===========
 
-A Simple Mortgage Calculator.
+A simple mortgage calculator.
 
 Run ``stack build && stack exec -- MortgageCalc-exe --help`` to get help on the tool.
 
