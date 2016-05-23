@@ -1,13 +1,10 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ViewPatterns #-}
 module Mortgage (
-    MortgagePaymentPlan
-  , runMortgage
+    runMortgage
   , runMortgageSimple
-  , runMortgageDefault
   , MortgageLoan(..)
   , AdditionalPayments(..)
   , AdditionalCosts(..)
@@ -27,8 +24,6 @@ import           Control.Monad.RWS
 import           Control.Monad.Fix
 import           Control.Applicative
 import           Mortgage.Money
-
-type MortgagePaymentPlan = Env
 
 data MortgageLoan = MortgageLoan {
     loanAmt   :: Money
@@ -135,14 +130,12 @@ runMonthly = do
     tell (Seq.singleton (MonthlyAmortized (min principal owe) interest (monthlyHOA env + monthlyPropertyTax env) day))    
     put (nextMonth day, max (owe - principal) 0) >> runMonthly
 
-runMortgageDefault loan costs pp = today >>= \day -> 
+runMortgage :: MortgageLoan -> Maybe AdditionalCosts -> Maybe AdditionalPayments -> IO AmortizedPayments
+runMortgage loan costs pp = today >>= \day -> 
     snd <$> execRWST (unMortgage runMonthly) (toMortgagePaymentPlan day loan costs pp) (day, loanAmt loan)
 
 runMortgageSimple :: Int -> Double -> Int -> IO AmortizedPayments
-runMortgageSimple amt apr years = runMortgageDefault (makeLoan amt apr years) Nothing Nothing
-
-runMortgage :: MortgageLoan -> IO AmortizedPayments
-runMortgage loan = runMortgageDefault loan Nothing Nothing
+runMortgageSimple amt apr years = runMortgage (makeLoan amt apr years) Nothing Nothing
 
 prettyShowAmortizedPayments :: AmortizedPayments -> String
 prettyShowAmortizedPayments (Seq.viewl -> Seq.EmptyL) = ""
@@ -154,4 +147,3 @@ prettyShowAmortizedPayments pps@(Seq.viewl -> p Seq.:< ps) = entries ++ summary 
           where showEntry (k, MonthlyAmortized p i o d) = "# " ++ show k ++ ": " ++ show d ++ ", SubTotal: " ++ show t
                     ++ ", PrincipalPaid: " ++ show p ++ ", InterestPaid: " ++ show i ++ ", Other (HOA, Property tax: " ++ show o ++ ")\n"
                   where t = i + p + o
-

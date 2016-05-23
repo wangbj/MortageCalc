@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import           Options.Applicative
@@ -40,7 +39,7 @@ greet (Config value down apr years tax hoa madd yearly) = do
     let loan       = MortgageLoan (realToFrac $ fromIntegral value * (100 - down) / 100) apr years
         acosts     = AdditionalCosts (maybe 0 fromIntegral hoa) (realToFrac (fromIntegral value * tax / 100 / 12))
         additional = AdditionalPayments (fmap fromIntegral madd) (fmap (fmap fromIntegral) yearly) Nothing
-    runMortgageDefault loan (Just acosts) (Just additional) >>= putStr . prettyShowAmortizedPayments
+    runMortgage loan (Just acosts) (Just additional) >>= putStr . prettyShowAmortizedPayments
         
 main :: IO ()
 main = execParser opts >>= greet

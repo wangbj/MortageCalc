@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TemplateHaskell #-}
 import qualified Data.Sequence as Seq
 import qualified Data.Foldable as F
@@ -10,7 +9,6 @@ import Control.Monad
 import Data.Functor
 import Control.Applicative
 
-import GHC.Generics
 import Mortgage
 
 addYear n day = fromGregorian (y + fromIntegral n) m d
@@ -56,3 +54,4 @@ runTests = $quickCheckAll
 
 main :: IO ()
 main = void runTests
+
